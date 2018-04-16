@@ -1,0 +1,52 @@
+<% if tty %>
+<%# Normalize \r\n to just \n %>
+stty -onlcr
+<% end %>
+
+<% if user %>
+su <%= user %> -s /bin/sh <<'SU_USER'
+<% end %>
+
+<% if dir %>
+  cd <%= dir %>
+<% end %>
+
+<%# base64 accepts --decode or -d, depending on platform %>
+if base64 --help 2>&1 | grep '\-\-decode' > /dev/null; then
+  base64_decode="base64 --decode"
+else
+  base64_decode="base64 -d"
+fi
+
+<% archives.each do |archive, dest| %>
+  <% if dest %>
+    mkdir -p <%= dest %> &&
+    echo <%= base64_encode(archive) %> | $base64_decode | tar -mxzf - -C <%= dest %>
+  <% else %>
+    echo <%= base64_encode(archive) %> | $base64_decode | tar -mxzf -
+  <% end %>
+<% end %>
+
+<% if files.any? %>
+  echo <%= escaped_base64_archived_files %> | $base64_decode | tar -mxzf -
+<% end %>
+
+<% if timeout %>
+  <%# timeout accepts an arg or -t for the wait time, depending on platform %>
+  timeout_cmd="timeout -s SIGKILL -t"
+  if [ -n "$(timeout -t 2>&1 > /dev/null | grep invalid)" ]; then
+    timeout_cmd="timeout -s SIGKILL"
+  fi
+
+  $timeout_cmd <%= timeout %> su -s <%= command_with_eof %>
+
+  if [ $? -ne 0 ]; then
+    echo <%= eof_delimiter %>--TIMEOUT
+  fi
+<% else %>
+  <%= command_with_eof %>
+<% end %>
+
+<% if user %>
+SU_USER
+<% end %>
