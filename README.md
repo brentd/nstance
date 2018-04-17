@@ -1,6 +1,6 @@
 # Nstance
 
-Nstance is a library for running shell commands inside sandboxed environments, like Docker containers (currently it supports only Docker).
+Nstance is a library for running shell commands inside sandboxed environments, like Docker containers.
 
 ## Features
 
