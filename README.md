@@ -1,16 +1,18 @@
 # Nstance
 
-Nstance is a library for running shell commands inside sandboxed environments, like Docker containers.
+Nstance is a Ruby library for running arbitrary shell commands inside Docker containers.
 
 ## Features
 
   * **Simple API**: many of the details of managing and connecting to containers have been abstracted away, and a simple event-based asynchronous API is provided for listening to stdout/stderr output, and if the driver supports it, stdin.
   * **Fast** (for its primary use case): Nstance is optimized for running shell commands on premade container images, where the commands may require a few small files or tarballs to be transferred.
-  * **Thread safety**: designed with concurrency in mind.
+  * **Thread safety**: container drivers maintain thread-safe data structures to allow concurrent access.
   * **Resource limiting**: Nstance was designed to run shell commands by untrusted users. Options exist to timeout long commands, and limit the amount of output a command may send. Note however that it makes no additional safety guarantees than those of the underlying container platform.
   * **Pluggable drivers**: the default driver uses the Docker Engine API to execute commands. However, Nstance was designed so that drivers could be developed around other container services like Kubernetes.
 
 ## Usage
+
+### Synchronous API
 
 ```ruby
 # Create a new instance with a Ruby Docker image from DockerHub,
@@ -43,10 +45,8 @@ instance.run("printf 'Hello, the date is: '; date") do |runner|
   # Called immediately when output is available
   runner.on_chunk    { |stream, chunk| puts "[#{stream}] #{chunk}" }
   # Called when the command completes, whether it terminated successfuly or not.
-  runner.on_complete { |result| puts result.status }
+  runner.on_complete { |result| puts result.status; instance.stop }
 end
-
-instance.stop
 ```
 
 ### `run` options
