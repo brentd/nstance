@@ -1,6 +1,6 @@
 # Nstance
 
-Nstance is a Ruby library for running arbitrary shell commands inside Docker containers.
+Nstance is a Ruby library for running arbitrary shell commands inside Docker containers. It was originally created as the backend of an in-browser editor used for teaching programming.
 
 ## Features
 
