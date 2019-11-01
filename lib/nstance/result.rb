@@ -12,7 +12,9 @@ module Nstance
     end
 
     def inspect
-      log = "---\n" + lines.map { |(stream, msg)| "#{stream} | #{msg}" }.join + "---"
+      log = "---\n"
+      log += lines.map { |(stream, msg)| "#{stream} | #{msg}" }.join if lines
+      log += "---"
       if error
         log + " error: #{error.inspect}"
       else
